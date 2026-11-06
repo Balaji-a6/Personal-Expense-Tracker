@@ -1,0 +1,29 @@
+{% extends 'base/base.html' %}
+{% block title %}Budgets | Paisa{% endblock %}
+{% block content %}
+<section class="page-heading d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div><p class="eyebrow mb-2">PLAN YOUR SPENDING</p><h1 class="page-title mb-1">Monthly budgets</h1><p class="text-secondary mb-0">Budget progress is based on expenses in the current month.</p></div>
+    <a class="btn btn-primary" href="{% url 'budget_add' %}"><i class="bi bi-plus-lg me-2"></i>Set a budget</a>
+</section>
+<section class="panel-card">
+    <div class="panel-heading"><div><h2 class="panel-title">Your category limits</h2><p class="panel-subtitle">Limits reset automatically each month.</p></div></div>
+    <div class="table-responsive">
+        <table class="table app-table align-middle mb-0">
+            <thead><tr><th>Category</th><th>Monthly limit</th><th>Spent this month</th><th>Remaining</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for budget in budgets %}
+            <tr>
+                <td class="fw-semibold">{{ budget.category.name }}</td>
+                <td>₹{{ budget.monthly_limit|floatformat:2 }}</td>
+                <td>₹{{ budget.spent|floatformat:2 }}</td>
+                <td class="{% if budget.exceeded %}text-danger{% endif %}">₹{{ budget.remaining_abs|floatformat:2 }}</td>
+                <td>{% if budget.exceeded %}<span class="badge text-bg-danger">Over limit</span>{% else %}<span class="badge text-bg-success">On track</span>{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5"><div class="empty-state">No budgets yet. Create a category budget to get started.</div></td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

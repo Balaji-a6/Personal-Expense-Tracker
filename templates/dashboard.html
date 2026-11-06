@@ -1,0 +1,183 @@
+{% extends 'base/base.html' %}
+{% block title %}Dashboard | Paisa{% endblock %}
+{% block content %}
+<section class="page-heading d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div>
+        <p class="eyebrow mb-2">YOUR FINANCES AT A GLANCE</p>
+        <h1 class="page-title mb-1">Dashboard</h1>
+        <p class="text-secondary mb-0">Your spending overview for {{ month_name }} {{ year }}.</p>
+    </div>
+    <a href="{% url 'expense_add' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Add expense</a>
+</section>
+
+<section class="row g-3 mb-4" aria-label="Expense totals">
+    <div class="col-12 col-md-6 col-xl-3">
+        <article class="summary-card summary-primary h-100">
+            <div class="summary-icon"><i class="bi bi-calendar2-week"></i></div>
+            <p class="summary-label">Spent this month</p>
+            <h2 class="summary-value">₹{{ month_total|floatformat:2 }}</h2>
+            <p class="summary-caption">{{ month_name }} spending</p>
+        </article>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <article class="summary-card h-100">
+            <div class="summary-icon icon-blue"><i class="bi bi-graph-up-arrow"></i></div>
+            <p class="summary-label">Spent this year</p>
+            <h2 class="summary-value">₹{{ year_total|floatformat:2 }}</h2>
+            <p class="summary-caption">{{ year }} total</p>
+        </article>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <article class="summary-card h-100">
+            <div class="summary-icon icon-green"><i class="bi bi-wallet2"></i></div>
+            <p class="summary-label">All-time spending</p>
+            <h2 class="summary-value">₹{{ all_total|floatformat:2 }}</h2>
+            <p class="summary-caption">Across all your records</p>
+        </article>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <article class="summary-card h-100">
+            <div class="summary-icon icon-amber"><i class="bi bi-receipt"></i></div>
+            <p class="summary-label">Expense records</p>
+            <h2 class="summary-value">{{ count }}</h2>
+            <p class="summary-caption">All-time transactions</p>
+        </article>
+    </div>
+</section>
+
+<section class="row g-3 mb-4">
+    <div class="col-12 col-xl-8">
+        <article class="panel-card h-100">
+            <div class="panel-heading">
+                <div><h2 class="panel-title">Monthly spending</h2><p class="panel-subtitle">A month-by-month view for {{ year }}</p></div>
+                <span class="panel-icon"><i class="bi bi-bar-chart-line"></i></span>
+            </div>
+            <div class="chart-wrap chart-wrap-tall"><canvas id="monthlyChart" aria-label="Monthly spending chart"></canvas></div>
+        </article>
+    </div>
+    <div class="col-12 col-xl-4">
+        <article class="panel-card h-100">
+            <div class="panel-heading">
+                <div><h2 class="panel-title">This month by category</h2><p class="panel-subtitle">Where your money went</p></div>
+                <span class="panel-icon"><i class="bi bi-pie-chart"></i></span>
+            </div>
+            {% if category_chart.labels %}
+            <div class="chart-wrap"><canvas id="categoryChart" aria-label="Spending by category chart"></canvas></div>
+            {% else %}
+            <div class="empty-chart"><i class="bi bi-pie-chart"></i><p>No spending recorded this month.</p></div>
+            {% endif %}
+        </article>
+    </div>
+</section>
+
+<section class="row g-3 mb-4">
+    <div class="col-12 col-xl-7">
+        <article class="panel-card h-100">
+            <div class="panel-heading">
+                <div><h2 class="panel-title">Recent expenses</h2><p class="panel-subtitle">Your latest transactions</p></div>
+                <a class="btn btn-sm btn-light border" href="{% url 'expense_list' %}">View all <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+            <div class="table-responsive">
+                <table class="table app-table align-middle mb-0">
+                    <thead><tr><th>Expense</th><th>Category</th><th>Date</th><th class="text-end">Amount</th></tr></thead>
+                    <tbody>
+                    {% for expense in recent %}
+                    <tr>
+                        <td class="fw-semibold">{{ expense.title }}</td>
+                        <td><span class="category-pill">{{ expense.category|default:"Uncategorized" }}</span></td>
+                        <td class="text-secondary text-nowrap">{{ expense.date|date:"d M Y" }}</td>
+                        <td class="text-end fw-semibold text-nowrap">₹{{ expense.amount|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4"><div class="empty-state">No expenses yet. Add your first expense to get started.</div></td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </div>
+    <div class="col-12 col-xl-5">
+        <article class="panel-card h-100">
+            <div class="panel-heading">
+                <div><h2 class="panel-title">Payment methods</h2><p class="panel-subtitle">This month's payment split</p></div>
+                <span class="panel-icon"><i class="bi bi-credit-card"></i></span>
+            </div>
+            {% if payment_chart.labels %}
+            <div class="chart-wrap"><canvas id="paymentChart" aria-label="Spending by payment method chart"></canvas></div>
+            {% else %}
+            <div class="empty-chart"><i class="bi bi-credit-card"></i><p>No payment data for this month.</p></div>
+            {% endif %}
+        </article>
+    </div>
+</section>
+
+<section class="panel-card mb-4">
+    <div class="panel-heading">
+        <div><h2 class="panel-title">Monthly budgets</h2><p class="panel-subtitle">Category spending against your limits</p></div>
+        <a class="btn btn-sm btn-light border" href="{% url 'budget_list' %}">Manage budgets</a>
+    </div>
+    {% for budget in budgets %}
+    <div class="budget-row">
+        <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
+            <strong>{{ budget.category }}</strong>
+            <span class="text-secondary">₹{{ budget.spent|floatformat:2 }} of ₹{{ budget.limit|floatformat:2 }}</span>
+        </div>
+        <div class="progress" role="progressbar" aria-label="{{ budget.category }} budget used" aria-valuenow="{{ budget.percent|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar {% if budget.exceeded %}bg-danger{% else %}bg-primary{% endif %}" style="width: {{ budget.percent }}%"></div>
+        </div>
+        {% if budget.exceeded %}
+        <p class="budget-warning mb-0 mt-2"><i class="bi bi-exclamation-triangle me-1"></i>Over budget by ₹{{ budget.overage|floatformat:2 }}.</p>
+        {% else %}
+        <p class="budget-caption mb-0 mt-2">₹{{ budget.remaining|floatformat:2 }} remaining this month</p>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div class="empty-state">Set a monthly budget to keep an eye on category spending. <a href="{% url 'budget_add' %}">Create a budget</a></div>
+    {% endfor %}
+</section>
+{{ category_chart|json_script:"category-chart-data" }}
+{{ monthly_chart|json_script:"monthly-chart-data" }}
+{{ payment_chart|json_script:"payment-chart-data" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+(() => {
+    const palette = ['#4169e1', '#22a06b', '#e7a93b', '#a16ae8', '#e76f51', '#35a3aa', '#d65780'];
+    const chartData = (id) => JSON.parse(document.getElementById(id).textContent);
+    const money = (value) => `₹${Number(value).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+    const category = chartData('category-chart-data');
+    const monthly = chartData('monthly-chart-data');
+    const payment = chartData('payment-chart-data');
+    const categoryCanvas = document.getElementById('categoryChart');
+    const paymentCanvas = document.getElementById('paymentChart');
+
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'bar',
+        data: { labels: monthly.labels, datasets: [{ label: 'Expenses', data: monthly.totals, backgroundColor: '#4169e1', borderRadius: 6, maxBarThickness: 34 }] },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => money(context.raw) } } },
+            scales: { y: { beginAtZero: true, ticks: { callback: money }, grid: { color: '#edf0f5' } }, x: { grid: { display: false } } }
+        }
+    });
+
+    if (categoryCanvas) {
+        new Chart(categoryCanvas, {
+            type: 'doughnut',
+            data: { labels: category.labels, datasets: [{ data: category.totals, backgroundColor: palette, borderWidth: 3, borderColor: '#fff' }] },
+            options: { maintainAspectRatio: false, cutout: '66%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 18 } }, tooltip: { callbacks: { label: (context) => `${context.label}: ${money(context.raw)}` } } } }
+        });
+    }
+
+    if (paymentCanvas) {
+        new Chart(paymentCanvas, {
+            type: 'doughnut',
+            data: { labels: payment.labels, datasets: [{ data: payment.totals, backgroundColor: palette, borderWidth: 3, borderColor: '#fff' }] },
+            options: { maintainAspectRatio: false, cutout: '66%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 18 } }, tooltip: { callbacks: { label: (context) => `${context.label}: ${money(context.raw)}` } } } }
+        });
+    }
+})();
+</script>
+{% endblock %}

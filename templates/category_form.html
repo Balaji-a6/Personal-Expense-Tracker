@@ -1,0 +1,23 @@
+{% extends 'base/base.html' %}
+{% block title %}Add category | Paisa{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow mb-2">ORGANIZE YOUR SPENDING</p><h1 class="page-title mb-1">Add a category</h1><p class="text-secondary mb-0">Use categories to understand your spending patterns.</p></section>
+<div class="row justify-content-center">
+    <div class="col-12 col-md-7 col-lg-5">
+        <section class="panel-card">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.name.id_for_label }}">Category name</label>
+                    {{ form.name }}
+                    {% for error in form.name.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">Save category</button>
+                    <a href="{% url 'category_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

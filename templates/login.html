@@ -1,0 +1,28 @@
+{% extends 'base/base.html' %}
+{% block title %}Log in | Paisa{% endblock %}
+{% block content %}
+<div class="auth-shell row justify-content-center">
+    <div class="col-12 col-md-7 col-lg-5">
+        <section class="panel-card">
+            <div class="text-center mb-4"><span class="auth-mark"><i class="bi bi-wallet2"></i></span><h1 class="h3 mt-3 mb-1">Welcome back</h1><p class="text-secondary mb-0">Log in to review your spending.</p></div>
+            {% if form.errors %}
+            <div class="alert alert-danger" role="alert">The username or password was not recognized. Please try again.</div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                <div class="mb-3">
+                    <label class="form-label" for="id_username">Username</label>
+                    <input type="text" name="username" id="id_username" class="form-control" autocomplete="username" required autofocus>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" for="id_password">Password</label>
+                    <input type="password" name="password" id="id_password" class="form-control" autocomplete="current-password" required>
+                </div>
+                <button class="btn btn-primary w-100" type="submit">Log in</button>
+            </form>
+            <p class="mt-4 mb-0 text-center text-secondary">New to Paisa? <a href="{% url 'register' %}">Create an account</a></p>
+        </section>
+    </div>
+</div>
+{% endblock %}
