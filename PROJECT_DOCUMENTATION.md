@@ -25,7 +25,8 @@ The Personal Expense Tracker (Paisa) is a web application for keeping track of p
 | Frontend | HTML, CSS, Bootstrap 5, JavaScript |
 | Charts | Chart.js |
 | Icons | Bootstrap Icons |
-| Database | Existing MySQL configuration, accessed through Django ORM |
+| Database | MySQL, accessed through Django ORM |
+| Configuration | `python-dotenv` (private settings stored in a `.env` file) |
 | Tests | Django `TestCase` and Django test client |
 | IDE | Visual Studio Code |
 
@@ -35,19 +36,19 @@ Bootstrap, Bootstrap Icons, and Chart.js are referenced from their public CDNs b
 
 - Python 3.10 or newer
 - MySQL server and a database account
-- `mysqlclient` package (installed from `requirements.txt`)
+- `mysqlclient` and `python-dotenv` packages (installed from `requirements.txt`)
 - A modern web browser
 - Visual Studio Code (recommended)
 
 ## 5. Installation and configuration
 
-1. Open PowerShell at the repository root.
+1. Download or clone the repository and open PowerShell in the project folder (the folder that contains `manage.py`).
 2. Create and activate a virtual environment.
 3. Install packages with `python -m pip install -r requirements.txt`.
-4. Change into the Django project folder with `Set-Location .\expense_tracker`.
-5. Set `DB_ENGINE=mysql` and the `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, and `DB_PORT` environment variables for the existing MySQL server.
-6. Set a private `DJANGO_SECRET_KEY`; set `DJANGO_DEBUG=True` only for local development.
-7. Run `python manage.py migrate` to apply pending migrations. Do not delete the database or reset migrations.
+4. Create an empty MySQL database named `expense_db`.
+5. Create a file named `.env` in the same folder as `manage.py` and add `DB_PASSWORD=your_mysql_password`. Add `DB_NAME`, `DB_USER`, `DB_HOST`, and `DB_PORT` only if they differ from the defaults. The `.env` file is private and is not uploaded to GitHub.
+6. Optionally add a private `DJANGO_SECRET_KEY` to `.env`; set `DJANGO_DEBUG=True` only for local development.
+7. Run `python manage.py migrate` to create the tables. Do not delete the database or reset migrations.
 8. Optionally create an administrator with `python manage.py createsuperuser`.
 9. Start the server with `python manage.py runserver`, then browse to <http://127.0.0.1:8000/>.
 
@@ -64,20 +65,24 @@ The Django ORM maps the application models to relational tables:
 
 Deleting a user deletes that user's categories, expenses, and budgets. Deleting a category leaves existing expenses in place as uncategorized records. Django handles password hashing and database parameterization.
 
+The file `database_structure.sql` in the repository contains the table structure exported from MySQL (structure only, no user data). To recreate the database, create an empty MySQL database named `expense_db` and run `python manage.py migrate`.
+
 ## 7. Modules
 
 | File or folder | Responsibility |
 |---|---|
-| `expense_tracker/expense_tracker/settings.py` | Django configuration, environment-based MySQL settings, apps, templates, and static assets |
-| `expense_tracker/expense_tracker/urls.py` | Project URL routing |
-| `expense_tracker/expense_tracker/tracker/models.py` | Category, expense, and budget models and validation |
-| `expense_tracker/expense_tracker/tracker/form.py` | Registration, expense, filter, category, and budget forms |
-| `expense_tracker/expense_tracker/tracker/views.py` | Authentication, dashboard summaries, user-scoped CRUD, filters, CSV, categories, and budgets |
-| `expense_tracker/expense_tracker/tracker/urls.py` | Application routes |
-| `expense_tracker/expense_tracker/tracker/admin.py` | Django admin model registration |
-| `expense_tracker/expense_tracker/tracker/tests.py` | Automated application and security-boundary tests |
-| `expense_tracker/templates/` | Shared layout and responsive page templates |
-| `static/` | Application stylesheet and browser-side validation |
+| `expense_tracker/settings.py` | Django configuration, `.env`-based MySQL settings, apps, templates, and static assets |
+| `expense_tracker/urls.py` | Project URL routing |
+| `expense_tracker/tracker/models.py` | Category, expense, and budget models and validation |
+| `expense_tracker/tracker/form.py` | Registration, expense, filter, category, and budget forms |
+| `expense_tracker/tracker/views.py` | Authentication, dashboard summaries, user-scoped CRUD, filters, CSV, categories, and budgets |
+| `expense_tracker/tracker/urls.py` | Application routes |
+| `expense_tracker/tracker/admin.py` | Django admin model registration |
+| `expense_tracker/tracker/tests.py` | Automated application and security-boundary tests |
+| `templates/` | Shared layout and responsive page templates |
+| `static/` | Application stylesheet (`style.css`) and browser-side validation (`script.js`) |
+| `database_structure.sql` | MySQL table structure export |
+| `requirements.txt` | Python package dependencies |
 
 ## 8. Main features
 
@@ -105,17 +110,19 @@ python manage.py test
 
 The tests cover registration and password hashing, authentication, user-specific record access, expense create/edit/delete, validation, search and filters, pagination, category uniqueness, budget calculations, charts, and CSV export.
 
-Manual browser checks should include desktop and narrow/mobile widths, the login and registration pages, each CRUD flow, chart rendering, CSV opening, and category-budget warnings. Screenshots should be captured from the running local project and added to `screenshots/`.
+Manual browser checks include desktop and narrow/mobile widths, the login and registration pages, each CRUD flow, chart rendering, CSV opening, and category-budget warnings.
 
 ## 10. Screenshots
 
-Add project screenshots in a `screenshots/` folder at the repository root before final submission:
+Screenshots of the running project are stored in the `screenshots/` folder:
 
 | Screen | File |
 |---|---|
+| Login page | `screenshots/login.png` |
 | Dashboard | `screenshots/dashboard.png` |
 | Expense list and filters | `screenshots/expenses.png` |
 | Expense form | `screenshots/add-expense.png` |
+| Categories | `screenshots/categories.png` |
 | Monthly budgets | `screenshots/budgets.png` |
 
 ## 11. How to run
@@ -130,4 +137,4 @@ Visit <http://127.0.0.1:8000/> and register a user. Use the navigation bar to ma
 
 ## 12. Conclusion
 
-This project demonstrates practical Django full-stack development, relational model design, safe user-specific data access, form validation, CRUD workflows, reporting, responsive frontend design, and automated tests. The configured database remains MySQL; SQLite is used only when explicitly selected for isolated checks or tests.
+This project demonstrates practical Django full-stack development, relational model design, safe user-specific data access, form validation, CRUD workflows, reporting, responsive frontend design, and automated tests. The database is MySQL, and private settings such as the database password are kept in a `.env` file that is never uploaded to GitHub. SQLite is used only when explicitly selected for isolated checks or tests.
