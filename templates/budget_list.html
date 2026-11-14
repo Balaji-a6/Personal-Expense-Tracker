@@ -14,7 +14,7 @@
             {% for budget in budgets %}
             <tr>
                 <td class="fw-semibold">{{ budget.category.name }}</td>
-                <td>₹{{ budget.monthly_limit|floatformat:2 }}</td>
+                <td>₹{{ budget.limit|floatformat:2 }}</td>
                 <td>₹{{ budget.spent|floatformat:2 }}</td>
                 <td class="{% if budget.exceeded %}text-danger{% endif %}">₹{{ budget.remaining_abs|floatformat:2 }}</td>
                 <td>{% if budget.exceeded %}<span class="badge text-bg-danger">Over limit</span>{% else %}<span class="badge text-bg-success">On track</span>{% endif %}</td>
